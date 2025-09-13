@@ -1,0 +1,134 @@
+PHANTOM REACT NATIVE SDK - PhantomProvider CONFIG 옵션 문서
+===================================================================
+
+## PhantomSDKConfig (필수 설정)
+PhantomProvider의 config prop으로 전달되는 설정 객체
+
+### 필수 항목:
+1. **apiBaseUrl**: string
+   - Phantom API의 기본 URL
+   - 예: "https://api.phantom.app/v1/wallets"
+
+2. **organizationId**: string  
+   - 조직 식별자
+   - 예: "my-organization-id"
+
+3. **scheme**: string
+   - 앱의 커스텀 URL scheme (deep linking용)
+   - 예: "myapp", "phantomtestapp"
+
+4. **embeddedWalletType**: "app-wallet" | "user-wallet" | string
+   - 임베디드 지갑 타입
+   - "app-wallet": 앱 전용 지갑 (OAuth 불필요)
+   - "user-wallet": 사용자 지갑 (OAuth 필요)
+
+5. **addressTypes**: [AddressType, ...AddressType[]]
+   - 지원할 주소 타입 배열 (최소 1개 필요)
+   - AddressType 옵션:
+     * AddressType.solana
+     * AddressType.ethereum
+     * 기타 블록체인 타입들
+
+6. **solanaProvider**: "web3js" | "kit" | string
+   - Solana 프로바이더 타입
+   - "web3js": Solana web3.js 사용
+   - "kit": Phantom kit 사용
+
+### 선택 항목:
+1. **autoConnect**: boolean (기본값: true)
+   - 기존 세션에 자동 연결 여부
+
+2. **authOptions**: object
+   - **authUrl**: string - 커스텀 인증 URL
+   - **redirectUrl**: string - 인증 후 리다이렉트 URL
+
+3. **appName**: string
+   - 앱 이름 (인증 화면에 표시)
+
+4. **appLogo**: string
+   - 앱 로고 URL (인증 화면에 표시)
+
+## PhantomDebugConfig (디버그 설정)
+PhantomProvider의 debugConfig prop으로 전달 (선택사항)
+
+1. **enabled**: boolean
+   - 디버그 로깅 활성화 여부
+
+## ConnectOptions (연결 옵션)
+useConnect() 훅에서 connect() 함수 호출 시 사용
+
+1. **provider**: "google" | "apple" | "jwt"
+   - OAuth 프로바이더 선택
+   - "google": 구글 로그인
+   - "apple": 애플 로그인  
+   - "jwt": JWT 토큰 인증
+
+2. **jwtToken**: string
+   - JWT 인증 시 사용할 토큰
+
+3. **customAuthData**: Record<string, any>
+   - 커스텀 인증 데이터
+
+## 예시 설정:
+
+### 기본 설정 (user-wallet):
+```javascript
+const config = {
+  apiBaseUrl: "https://api.phantom.app/v1/wallets",
+  organizationId: "my-org-id",
+  scheme: "myapp",
+  embeddedWalletType: "user-wallet",
+  addressTypes: [AddressType.solana],
+  solanaProvider: "web3js",
+  autoConnect: true,
+  appName: "My Wallet App",
+  appLogo: "https://myapp.com/logo.png"
+};
+```
+
+### 테스트용 설정 (app-wallet):
+```javascript
+const config = {
+  apiBaseUrl: "https://api.phantom.app/v1/wallets",
+  organizationId: "test-org",
+  scheme: "testapp",
+  embeddedWalletType: "app-wallet", // OAuth 불필요
+  addressTypes: [AddressType.solana],
+  solanaProvider: "web3js"
+};
+```
+
+### 디버그 설정:
+```javascript
+const debugConfig = {
+  enabled: true
+};
+```
+
+## 주요 훅들:
+
+1. **useConnect()**: 지갑 연결
+2. **useDisconnect()**: 지갑 연결 해제
+3. **useAccounts()**: 계정 정보 조회
+4. **useSignMessage()**: 메시지 서명
+5. **useSignAndSendTransaction()**: 트랜잭션 서명 및 전송
+
+## 참고사항:
+
+- embeddedWalletType이 "user-wallet"인 경우 OAuth 인증이 필요함
+- embeddedWalletType이 "app-wallet"인 경우 OAuth 없이 바로 사용 가능
+- addressTypes는 배열이며 최소 1개 이상의 AddressType이 필요함
+- scheme은 앱의 info.plist/AndroidManifest.xml에도 등록되어야 함
+- solanaProvider는 Solana 네트워크 사용 시에만 필요함
+
+## 트러블슈팅:
+
+1. "apiBaseUrl is required" 오류:
+   - config에 apiBaseUrl 항목 추가 필요
+
+2. OAuth 관련 오류:
+   - embeddedWalletType을 "app-wallet"로 변경하여 테스트
+
+3. Deep linking 오류:
+   - scheme이 올바르게 설정되었는지 확인
+   - app.json에 scheme 추가 확인
